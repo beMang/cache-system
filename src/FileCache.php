@@ -52,13 +52,47 @@ class FileCache
             $keyName = $key;
             $key = $this->getCacheInfo()->getKey($key);
             if (is_array($key)) {
-                return $this->keyIsExpired($key);
+                if ($this->keyIsExpired($key) === false) {
+                    $this->delete($keyName);
+                    return $default;
+                } else {
+                    if (is_file($this->getPath() . $key['id'])) {
+                        return unserialize(file_get_contents($this->getPath() . $key['id']));
+                    } else {
+                        return $default;
+                    }
+                }
             } else {
                 return $default;
             }
         } else {
             throw new InvalidArgumentException("La clé est invalide");
             return $default;
+        }
+    }
+
+    public function delete($key)
+    {
+        if (is_string($key) and !empty($key)) {
+            $keyName = $key;
+            $key = $this->getCacheInfo()->getKey($key);
+            if (is_array($key)) {
+                $newKeysId = $this->getCacheInfo()->getKeysId();
+                unset($newKeysId[$keyName]);
+                $this->getCacheInfo()->setKeys($newKeysId);
+                file_put_contents($this->getPath() . '/cacheInfo', serialize($newKeysId));
+                if (is_file($this->getPath() . $key['id'])) {
+                    unlink($this->getPath() . $key['id']);
+                    return true;
+                } else {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            throw new InvalidArgumentException("La clé est invalide");
+            return false;
         }
     }
 
@@ -103,9 +137,14 @@ class FileCache
             $lastChangeDate->setTimestamp($lastChangeTime);
             $actualDate = new \DateTime;
             $interval = $actualDate->diff($lastChangeDate);
-            var_dump($interval);
-            var_dump($key['ttl']);
-            return true;
+            $autorizedInterval = $key['ttl'];
+            $interval = Time::getMinuteOfDateInterval($interval);
+            $autorizedInterval = Time::getMinuteOfDateInterval($autorizedInterval);
+            if ($interval >= $autorizedInterval) {
+                return false;
+            } else {
+                return true;
+            }
         } else {
             return true;
         }
