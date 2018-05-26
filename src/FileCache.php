@@ -112,6 +112,24 @@ class FileCache
         }
     }
 
+    public function has($key)
+    {
+        if (is_string($key) and !empty($key)) {
+            if ($this->getCacheInfo()->hasKey($key) === true) {
+                $key = $this->getCacheInfo()->getKey($key);
+                if (file_exists($this->getPath() . $key['id'])) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            throw new InvalidArgumentException("La clé est invalide");
+        }
+    }
+
     private function setPath(string $path)
     {
         if (is_dir($path)) {
