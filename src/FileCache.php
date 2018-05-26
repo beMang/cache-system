@@ -2,23 +2,46 @@
 
 namespace bemang\Cache;
 
-use bemang\Cache\Time;
-use bemang\Cache\CacheInfo;
 use Psr\SimpleCache\CacheInterface;
 
-class FileCache
+/**
+ * Class qui gère le cache avec des fichiers
+ * @see CacheInterface
+ */
+class FileCache implements CacheInterface
 {
+    /**
+     * Chemin du cache
+     *
+     * @var string
+     */
     protected $path;
+
+    /**
+     * Contient la classe des infos du Cahe
+     *
+     * @var CacheInfo
+     */
     protected $cacheInfo;
+
+    /**
+     * Constante pour le temps par défaut du cache
+     * En minute (1440 minutes = 1 jour)
+     */
     const DEFAULT_TTL = 1440;
 
+    /**
+     * Constructeur de FileCache
+     *
+     * @param string $path Chemin du cache
+     */
     public function __construct(string $path)
     {
         $this->setPath($path);
         $this->initCacheInfo();
     }
 
-    public function set($key, $value, $ttl = null)
+    public function set($key, $value, $ttl = null) : bool
     {
         if (is_string($key) and !empty($key)) {
             $ttlInterval = Time::getValidInterval($ttl);
@@ -71,7 +94,7 @@ class FileCache
         }
     }
 
-    public function delete($key)
+    public function delete($key) : bool
     {
         if (is_string($key) and !empty($key)) {
             $keyName = $key;
@@ -112,6 +135,60 @@ class FileCache
         }
     }
 
+    public function getMultiple($keys, $default = null) : array
+    {
+        if (is_iterable($keys)) {
+            $resultKeys = [];
+            foreach ($keys as $key) {
+                if (is_string($key) and !empty($key)) {
+                    $resultKeys[] = $this->get($key, $default);
+                } else {
+                    throw new InvalidArgumentException("Une des clés est invalide");
+                }
+            }
+            return $resultKeys;
+        } else {
+            throw new InvalidArgumentException("La liste des clés invalide");
+            return [];
+        }
+    }
+
+    public function setMultiple($values, $ttl = null)
+    {
+        if (is_iterable($keys)) {
+            $result = true;
+            foreach ($values as $key => $value) {
+                if ($this->set($key, $value, $ttl) === false) {
+                    $result = false;
+                }
+            }
+            return $result;
+        } else {
+            throw new InvalidArgumentException("La liste des clés et des valeurs sont invalides");
+            return false;
+        }
+    }
+
+    public function deleteMultiple($keys) : bool
+    {
+        if (is_iterable($keys)) {
+            $result = true;
+            foreach ($keys as $key) {
+                if (is_string($key) and !empty($key)) {
+                    if ($this->delete($key) === false) {
+                        $result = false;
+                    }
+                } else {
+                    throw new InvalidArgumentException("Une des clés est invalide");
+                }
+            }
+            return $result;
+        } else {
+            throw new InvalidArgumentException("La liste des clés invalides");
+            return false;
+        }
+    }
+
     public function has($key)
     {
         if (is_string($key) and !empty($key)) {
@@ -139,6 +216,11 @@ class FileCache
         }
     }
 
+    /**
+     * Récupère le chemin du cache
+     *
+     * @return string Chemin du cache
+     */
     public function getPath()
     {
         return $this->path;
