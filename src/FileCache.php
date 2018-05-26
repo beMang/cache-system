@@ -96,6 +96,22 @@ class FileCache
         }
     }
 
+    public function clear() : bool
+    {
+        $keys = $this->getCacheInfo()->getKeysId();
+        foreach ($keys as $key) {
+            if (is_file($this->getPath() . $key['id'])) {
+                unlink($this->getPath() . $key['id']);
+            }
+        }
+        $result = file_put_contents($this->getPath() . '/cacheInfo', serialize([]));
+        if ($result == false) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     private function setPath(string $path)
     {
         if (is_dir($path)) {
