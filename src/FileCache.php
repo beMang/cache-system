@@ -155,7 +155,7 @@ class FileCache implements CacheInterface
 
     public function setMultiple($values, $ttl = null)
     {
-        if (is_iterable($keys)) {
+        if (is_iterable($values)) {
             $result = true;
             foreach ($values as $key => $value) {
                 if ($this->set($key, $value, $ttl) === false) {
