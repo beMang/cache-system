@@ -192,15 +192,17 @@ class FileCache implements CacheInterface
     public function has($key)
     {
         if (is_string($key) and !empty($key)) {
-            if ($this->getCacheInfo()->hasKey($key) === true) {
-                $key = $this->getCacheInfo()->getKey($key);
-                if (file_exists($this->getPath() . $key['id'])) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
+            $keyName = $key;
+            $key = $this->getCacheInfo()->getKey($keyName);
+            if ($key === false) {
                 return false;
+            } else {
+                if ($this->keyIsExpired($key) === true) {
+                    $this->delete($keyName);
+                    return false;
+                } else {
+                    return true;
+                }
             }
         } else {
             throw new InvalidArgumentException("La clé est invalide");
