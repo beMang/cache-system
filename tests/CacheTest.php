@@ -12,17 +12,38 @@ class CacheTest extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass()
     {
         require_once(__DIR__ . '/../vendor/autoload.php');
-        self::$cacheInstance = new FileCache(self::CACHE_PATH);
     }
 
+    public function testConstruction()
+    {
+        self::$cacheInstance = new FileCache(self::CACHE_PATH);
+        $this->assertInstanceOf(FileCache::class, self::$cacheInstance);
+    }
+
+    public function testInvalidsKeys()
+    {
+        $this->expectExceptionMessage('La clé est invalide');
+        self::$cacheInstance->get([]);
+        $this->expectExceptionMessage('La clé est invalide');
+        self::$cacheInstance->set(1, 'failed');
+        $this->expectExceptionMessage('La clé est invalide');
+        self::$cacheInstance->delete('');
+    }
 
     public function testGetAndSet()
     {
-        $cache = self::$cacheInstance;
-        $cache->setMultiple([
+        self::$cacheInstance->setMultiple([
         'test1' => 'hello, test1',
         'test2' => 'hello, test2'
         ]);
-        $this->assertEquals('hello, test1', $cache->get('test1'));
+        $this->assertEquals('hello, test1', self::$cacheInstance->get('test1'));
+        self::$cacheInstance->set('test1', 'hello, redefine a key :)');
+        $this->assertEquals('hello, redefine a key :)', self::$cacheInstance->get('test1'));
+    }
+
+    public function testHas()
+    {
+        $this->assertFalse(self::$cacheInstance->has(uniqid()));
+        $this->assertTrue(self::$cacheInstance->has('test1'));
     }
 }
