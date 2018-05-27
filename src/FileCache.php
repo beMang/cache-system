@@ -75,7 +75,7 @@ class FileCache implements CacheInterface
             $keyName = $key;
             $key = $this->getCacheInfo()->getKey($key);
             if (is_array($key)) {
-                if ($this->keyIsExpired($key) === false) {
+                if ($this->keyIsExpired($key) === true) {
                     $this->delete($keyName);
                     return $default;
                 } else {
@@ -212,7 +212,7 @@ class FileCache implements CacheInterface
         if (is_dir($path)) {
             $this->path = $path;
         } else {
-            throw new \Exception('Le chemin du cache est invalide');
+            throw new \InvalidArgumentException('Le chemin du cache est invalide');
         }
     }
 
@@ -257,9 +257,9 @@ class FileCache implements CacheInterface
             $interval = Time::getMinuteOfDateInterval($interval);
             $autorizedInterval = Time::getMinuteOfDateInterval($autorizedInterval);
             if ($interval >= $autorizedInterval) {
-                return false;
-            } else {
                 return true;
+            } else {
+                return false;
             }
         } else {
             return true;
