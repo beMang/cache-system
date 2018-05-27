@@ -9,6 +9,8 @@ matrix:
     - php: 7.1.9
 
 install:
+  - mkdir tmp
+  - ls
   - composer install
   - composer dump -o
 

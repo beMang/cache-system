@@ -2,12 +2,24 @@
 
 namespace Tests;
 
-class CacheTest
+use bemang\Cache\FileCache;
+
+class CacheTest extends \PHPUnit\Framework\TestCase
 {
-    public function myIdea()
+    const CACHE_PATH = __DIR__ . '/../tmp/';
+
+    public function setUp()
     {
-        $cache = new Cache($path);
-        $cache->set('key', 'value');
-        $cache->get('key');
+        require_once(__DIR__ . '/../vendor/autoload.php');
+    }
+
+    public function testGetAndSet()
+    {
+        $cache = new FileCache(self::CACHE_PATH);
+        $cache->setMultiple([
+        'test1' => 'hello, test1',
+        'test2' => 'hello, test2'
+        ]);
+        $this->assertEquals('hello, test1', $cache->get('test1'));
     }
 }
