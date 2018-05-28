@@ -4,14 +4,14 @@ namespace bemang\Cache;
 
 class Time
 {
-    public static function getValidInterval($interval = false)
+    public static function getValidInterval($interval)
     {
         if (is_numeric($interval)) {
             return new \DateInterval('P0Y0DT0H' . $interval . 'M');
         } elseif ($interval instanceof \DateInterval) {
             return $interval;
         } else {
-            return new \DateInterval('P0Y0DT0H' . FileCache::DEFAULT_TTL . 'M');
+            throw new InvalidArgumentException('L\'interval ttl est invalide');
         }
     }
 

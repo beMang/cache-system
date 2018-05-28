@@ -28,7 +28,7 @@ class FileCache implements CacheInterface
      * Constante pour le temps par défaut du cache
      * En minute (1440 minutes = 1 jour)
      */
-    const DEFAULT_TTL = 1440;
+    protected $defaultTtl = 1440;
 
     /**
      * Constructeur de FileCache
@@ -43,6 +43,9 @@ class FileCache implements CacheInterface
 
     public function set($key, $value, $ttl = null) : bool
     {
+        if (is_null($ttl)) {
+            $ttl = $this->getDefaultTtl();
+        }
         if (is_string($key) and !empty($key)) {
             $ttlInterval = Time::getValidInterval($ttl);
             if ($this->getCacheInfo()->hasKey($key)) {
@@ -214,7 +217,7 @@ class FileCache implements CacheInterface
         if (is_dir($path)) {
             $this->path = $path;
         } else {
-            throw new \InvalidArgumentException('Le chemin du cache est invalide');
+            throw new InvalidArgumentException('Le chemin du cache est invalide');
         }
     }
 
@@ -226,6 +229,28 @@ class FileCache implements CacheInterface
     public function getPath()
     {
         return $this->path;
+    }
+
+    /**
+     * Modifie le ttl par défaut
+     *
+     * @param integer $defaultTtl Defaut ttl (En minute)
+     * @return integer Retourne le ttl fourni
+     */
+    public function setDefaultTtl(int $defaultTtl) : int
+    {
+        $this->defaultTtl = $defaultTtl;
+        return $defaultTtl;
+    }
+
+    /**
+     * Retourne le ttl par défaut
+     *
+     * @return integer Ttl par défaut (en minute)
+     */
+    public function getDefaultTtl() : int
+    {
+        return $this->defaultTtl;
     }
 
     private function setCacheInfo(CacheInfo $cacheInfo)
