@@ -65,6 +65,12 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         self::$cacheInstance->deleteMultiple('jkm');
     }
 
+    public function testInvalidArraySetMultiple()
+    {
+        $this->expectExceptionMessage('La liste des clés et des valeurs sont invalides');
+        self::$cacheInstance->setMultiple(123);
+    }
+
     public function testOneInvalidKeyDeleteMultiple()
     {
         $this->expectExceptionMessage('Une des clés est invalide');
