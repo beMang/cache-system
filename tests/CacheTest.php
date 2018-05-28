@@ -41,6 +41,12 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         self::$cacheInstance->set(1, 'failed');
     }
 
+    public function testInvalidSetTtl()
+    {
+        $this->expectExceptionMessage('L\'interval ttl est invalide');
+        self::$cacheInstance->set('test5', 'hello, test5', 'hl');
+    }
+
     public function testInvalidDelete()
     {
         $this->expectExceptionMessage('La clé est invalide');
@@ -129,5 +135,11 @@ class CacheTest extends \PHPUnit\Framework\TestCase
     {
         $this->assertTrue(self::$cacheInstance->clear());
         $this->assertTrue(self::$cacheInstance->clear());
+    }
+
+    public function testSetDefaultTtl()
+    {
+        self::$cacheInstance->setDefaultTtl(1440);
+        $this->assertEquals(1440, self::$cacheInstance->getDefaultTtl());
     }
 }
