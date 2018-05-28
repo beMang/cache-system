@@ -41,6 +41,12 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         self::$cacheInstance->set(1, 'failed');
     }
 
+    public function testInvalidSetTtl()
+    {
+        $this->expectExceptionMessage('L\'interval ttl est invalide');
+        self::$cacheInstance->set('test5', 'hello, test5', 'hl');
+    }
+
     public function testInvalidDelete()
     {
         $this->expectExceptionMessage('La clé est invalide');
@@ -53,12 +59,44 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         self::$cacheInstance->has([]);
     }
 
+    public function testInvalidListDeleteMultiple()
+    {
+        $this->expectExceptionMessage('La liste des clés invalide');
+        self::$cacheInstance->deleteMultiple('jkm');
+    }
+
+    public function testOneInvalidKeyDeleteMultiple()
+    {
+        $this->expectExceptionMessage('Une des clés est invalide');
+        self::$cacheInstance->deleteMultiple([
+            'hello',
+            []
+        ]);
+    }
+
+    public function testInvalidListGetMultiple()
+    {
+        $this->expectExceptionMessage('La liste des clés invalide');
+        self::$cacheInstance->getMultiple('jkm');
+    }
+
+    public function testOneInvalidKeyGetMultiple()
+    {
+        $this->expectExceptionMessage('Une des clés est invalide');
+        self::$cacheInstance->getMultiple([
+            'hello',
+            []
+        ]);
+    }
+
     public function testGetAndSet()
     {
         self::$cacheInstance->setMultiple([
         'test1' => 'hello, test1',
-        'test2' => 'hello, test2'
+        'test2' => 'hello, test2',
+        'test3' => 'hello, test3'
         ]);
+        self::$cacheInstance->set('test4', 'hello, test4');
         $this->assertEquals('hello, test1', self::$cacheInstance->get('test1'));
         self::$cacheInstance->set('test1', 'hello, redefine a key :)');
         $this->assertEquals('hello, redefine a key :)', self::$cacheInstance->get('test1'));
@@ -71,15 +109,37 @@ class CacheTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue(self::$cacheInstance->has('test1'));
     }
 
+    public function testGetMultiple()
+    {
+        $this->assertEquals([
+            self::$cacheInstance->get('test1'),
+            self::$cacheInstance->get('test2')
+        ], self::$cacheInstance->getMultiple(['test1', 'test2']));
+    }
+
     public function testDelete()
     {
         $this->assertFalse(self::$cacheInstance->delete(uniqid()));
-        $this->assertTrue(self::$cacheInstance->delete('test2'));
+        $this->assertTrue(self::$cacheInstance->delete('test3'));
+        $this->assertEquals('default value', self::$cacheInstance->get('test3', 'default value'));
+    }
+
+    public function testDeleteMultiple()
+    {
+        $this->assertFalse(self::$cacheInstance->deleteMultiple([uniqid(), uniqid()]));
+        $this->assertTrue(self::$cacheInstance->deleteMultiple(['test2', 'test1']));
         $this->assertEquals('default value', self::$cacheInstance->get('test2', 'default value'));
     }
 
     public function testClear()
     {
         $this->assertTrue(self::$cacheInstance->clear());
+        $this->assertTrue(self::$cacheInstance->clear());
+    }
+
+    public function testSetDefaultTtl()
+    {
+        self::$cacheInstance->setDefaultTtl(1440);
+        $this->assertEquals(1440, self::$cacheInstance->getDefaultTtl());
     }
 }
