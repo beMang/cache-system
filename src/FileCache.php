@@ -38,11 +38,12 @@ class FileCache implements CacheInterface
     public function __construct(string $path)
     {
         $this->setPath($path);
-        $this->initCacheInfo();
+        $this->updateCacheInfo();
     }
 
     public function set($key, $value, $ttl = null) : bool
     {
+        $this->updateCacheInfo();
         if (is_null($ttl)) {
             $ttl = $this->getDefaultTtl();
         }
@@ -74,6 +75,7 @@ class FileCache implements CacheInterface
 
     public function get($key, $default = null)
     {
+        $this->updateCacheInfo();
         if (is_string($key) and !empty($key)) {
             $keyName = $key;
             $key = $this->getCacheInfo()->getKey($key);
@@ -99,6 +101,7 @@ class FileCache implements CacheInterface
 
     public function delete($key) : bool
     {
+        $this->updateCacheInfo();
         if (is_string($key) and !empty($key)) {
             $keyName = $key;
             $key = $this->getCacheInfo()->getKey($key);
@@ -124,6 +127,7 @@ class FileCache implements CacheInterface
 
     public function clear() : bool
     {
+        $this->updateCacheInfo();
         $keys = $this->getCacheInfo()->getKeysId();
         foreach ($keys as $key) {
             if (is_file($this->getPath() . $key['id'])) {
@@ -194,6 +198,7 @@ class FileCache implements CacheInterface
 
     public function has($key)
     {
+        $this->updateCacheInfo();
         if (is_string($key) and !empty($key)) {
             $keyName = $key;
             $key = $this->getCacheInfo()->getKey($keyName);
@@ -260,10 +265,11 @@ class FileCache implements CacheInterface
 
     private function getCacheInfo()
     {
+        $this->updateCacheInfo();
         return $this->cacheInfo;
     }
 
-    private function initCacheInfo()
+    private function updateCacheInfo()
     {
         if (!file_exists($this->getPath() . '/cacheInfo')) {
             file_put_contents($this->getPath() . '/cacheInfo', serialize([]));
