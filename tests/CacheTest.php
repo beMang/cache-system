@@ -12,7 +12,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
     const CACHE_PATH = __DIR__ . '/../tmp/';
     protected static $cacheInstance;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() :void
     {
         require_once(__DIR__ . '/../vendor/autoload.php');
     }
